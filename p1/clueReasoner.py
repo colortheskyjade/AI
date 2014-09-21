@@ -50,10 +50,61 @@ def initialClauses():
         clauses.append([getPairNumFromNames(p,c) for p in extendedPlayers])
 
     # A card cannot be in two places.
+    # We want (A + B)(-A + -B) for all A, B in extendedPlayers
+    for c in cards:
+        for p in extendedPlayers:
+            for p2 in extendedPlayers:
+                if (p != p2):
+                    clause1 = []
+                    clause2 = []
+                    clause1.append(getPairNumFromNames(p,c))
+                    clause1.append(getPairNumFromNames(p2,c))
+                    clause2.append(-1 * getPairNumFromNames(p, c))
+                    clause2.append(-1 * getPairNumFromNames(p2, c))
+                    clauses.append(clause1)
+                    clauses.append(clause2)
 
     # At least one card of each category is in the case file.
+    clauses.append([getPairNumFromNames(caseFile, s) for s in suspects])
+    clauses.append([getPairNumFromNames(caseFile, s) for w in weapons])
+    clauses.append([getPairNumFromNames(caseFile, s) for r in rooms])
 
     # No two cards in each category can both be in the case file.
+    for s in suspects:
+        for s2 in suspects:
+            if(s != s2):
+                clause1 = []
+                clause2 = []
+                clause1.append(getPairNumFromNames(caseFile,s))
+                clause1.append(getPairNumFromNames(caseFile,s2))
+                clause2.append(-1 * getPairNumFromNames(caseFile,s))
+                clause2.append(-1 * getPairNumFromNames(caseFile,s2))
+                clauses.append(clause1)
+                clauses.append(clause2)
+
+    for w in weapons:
+        for w2 in weapons:
+            if(w != w2):
+                clause1 = []
+                clause2 = []
+                clause1.append(getPairNumFromNames(caseFile,w))
+                clause1.append(getPairNumFromNames(caseFile,w2))
+                clause2.append(-1 * getPairNumFromNames(caseFile,w))
+                clause2.append(-1 * getPairNumFromNames(caseFile,w2))
+                clauses.append(clause1)
+                clauses.append(clause2)
+
+    for r in rooms:
+        for r2 in rooms:
+            if(r != r2):
+                clause1 = []
+                clause2 = []
+                clause1.append(getPairNumFromNames(caseFile,r))
+                clause1.append(getPairNumFromNames(caseFile,r2))
+                clause2.append(-1 * getPairNumFromNames(caseFile,r))
+                clause2.append(-1 * getPairNumFromNames(caseFile,r2))
+                clauses.append(clause1)
+                clauses.append(clause2)
 
     return clauses
 
