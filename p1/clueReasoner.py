@@ -34,11 +34,11 @@ weapons = ["kn", "ca", "re", "ro", "pi", "wr"]
 rooms = ["ha", "lo", "di", "ki", "ba", "co", "bi", "li", "st"]
 cards = suspects + weapons + rooms
 
-def getPairNumFromNames(player,card):
+def getPairNumFromNames(player, card):
     return getPairNumFromPositions(extendedPlayers.index(player),
                                    cards.index(card))
 
-def getPairNumFromPositions(player,card):
+def getPairNumFromPositions(player, card):
     return player*len(cards) + card + 1
 
 # TO BE IMPLEMENTED AS AN EXERCISE
@@ -47,18 +47,18 @@ def initialClauses():
 
     # Each card is in at least one place (including case file).
     for c in cards:
-        clauses.append([getPairNumFromNames(p,c) for p in extendedPlayers])
+        clauses.append([getPairNumFromNames(p, c) for p in extendedPlayers])
 
     # A card cannot be in two places.
     # We want (A + B)(-A + -B) for all A, B in extendedPlayers
     for c in cards:
         for p in extendedPlayers:
             for p2 in extendedPlayers:
-                if (p != p2):
+                if p != p2:
                     clause1 = []
                     clause2 = []
-                    clause1.append(getPairNumFromNames(p,c))
-                    clause1.append(getPairNumFromNames(p2,c))
+                    clause1.append(getPairNumFromNames(p, c))
+                    clause1.append(getPairNumFromNames(p2, c))
                     clause2.append(-1 * getPairNumFromNames(p, c))
                     clause2.append(-1 * getPairNumFromNames(p2, c))
                     clauses.append(clause1)
@@ -72,57 +72,61 @@ def initialClauses():
     # No two cards in each category can both be in the case file.
     for s in suspects:
         for s2 in suspects:
-            if(s != s2):
+            if s != s2:
                 clause1 = []
                 clause2 = []
-                clause1.append(getPairNumFromNames(caseFile,s))
-                clause1.append(getPairNumFromNames(caseFile,s2))
-                clause2.append(-1 * getPairNumFromNames(caseFile,s))
-                clause2.append(-1 * getPairNumFromNames(caseFile,s2))
+                clause1.append(getPairNumFromNames(caseFile, s))
+                clause1.append(getPairNumFromNames(caseFile, s2))
+                clause2.append(-1 * getPairNumFromNames(caseFile, s))
+                clause2.append(-1 * getPairNumFromNames(caseFile, s2))
                 clauses.append(clause1)
                 clauses.append(clause2)
 
     for w in weapons:
         for w2 in weapons:
-            if(w != w2):
+            if w != w2:
                 clause1 = []
                 clause2 = []
-                clause1.append(getPairNumFromNames(caseFile,w))
-                clause1.append(getPairNumFromNames(caseFile,w2))
-                clause2.append(-1 * getPairNumFromNames(caseFile,w))
-                clause2.append(-1 * getPairNumFromNames(caseFile,w2))
+                clause1.append(getPairNumFromNames(caseFile, w))
+                clause1.append(getPairNumFromNames(caseFile, w2))
+                clause2.append(-1 * getPairNumFromNames(caseFile, w))
+                clause2.append(-1 * getPairNumFromNames(caseFile, w2))
                 clauses.append(clause1)
                 clauses.append(clause2)
 
     for r in rooms:
         for r2 in rooms:
-            if(r != r2):
+            if r != r2:
                 clause1 = []
                 clause2 = []
-                clause1.append(getPairNumFromNames(caseFile,r))
-                clause1.append(getPairNumFromNames(caseFile,r2))
-                clause2.append(-1 * getPairNumFromNames(caseFile,r))
-                clause2.append(-1 * getPairNumFromNames(caseFile,r2))
+                clause1.append(getPairNumFromNames(caseFile, r))
+                clause1.append(getPairNumFromNames(caseFile, r2))
+                clause2.append(-1 * getPairNumFromNames(caseFile, r))
+                clause2.append(-1 * getPairNumFromNames(caseFile, r2))
                 clauses.append(clause1)
                 clauses.append(clause2)
 
     return clauses
 
-# TO BE IMPLEMENTED AS AN EXERCISE  
-def hand(player,cards):
+# TO BE IMPLEMENTED AS AN EXERCISE
+def hand(player, cards):
+    clauses = []
+    for c in cards:
+        clauses.append(getPairNumFromNames(player, c))
+
+    return clauses
+
+
+# TO BE IMPLEMENTED AS AN EXERCISE
+def suggest(suggester, card1, card2, card3, refuter, cardShown):
     return []
 
-
-# TO BE IMPLEMENTED AS AN EXERCISE  
-def suggest(suggester,card1,card2,card3,refuter,cardShown):
+# TO BE IMPLEMENTED AS AN EXERCISE
+def accuse(accuser, card1, card2, card3, isCorrect):
     return []
 
-# TO BE IMPLEMENTED AS AN EXERCISE  
-def accuse(accuser,card1,card2,card3,isCorrect):
-    return []
-
-def query(player,card,clauses):
-    return SATSolver.testLiteral(getPairNumFromNames(player,card),clauses)
+def query(player, card, clauses):
+    return SATSolver.testLiteral(getPairNumFromNames(player, card), clauses)
 
 def queryString(returnCode):
     if returnCode == True:
@@ -137,14 +141,14 @@ def printNotepad(clauses):
         print '\t', player,
     print '\t', caseFile
     for card in cards:
-        print card,'\t',
+        print card, '\t',
         for player in players:
-            print queryString(query(player,card,clauses)),'\t',
-        print queryString(query(caseFile,card,clauses))
+            print queryString(query(player, card, clauses)), '\t',
+        print queryString(query(caseFile, card, clauses))
 
 def playClue():
     clauses = initialClauses()
-    clauses.extend(hand("sc",["wh", "li", "st"]))
+    clauses.extend(hand("sc", ["wh", "li", "st"]))
     clauses.extend(suggest("sc", "sc", "ro", "lo", "mu", "sc"))
     clauses.extend(suggest("mu", "pe", "pi", "di", "pe", None))
     clauses.extend(suggest("wh", "mu", "re", "ba", "pe", None))
