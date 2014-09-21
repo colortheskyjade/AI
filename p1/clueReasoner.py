@@ -119,7 +119,47 @@ def hand(player, cards):
 
 # TO BE IMPLEMENTED AS AN EXERCISE
 def suggest(suggester, card1, card2, card3, refuter, cardShown):
-    return []
+    clauses = []
+    player = extendedPlayers[(extendedPlayers.index(suggester) + 1) % 
+                             len(extendedPlayers)]
+
+    # If no one refutes, then no one but the suggester and the caseFile
+    # could possibly have the card.
+    if refuter == None:
+        for p in players:
+            if p !== suggester:
+                clauses.add(-1 * getPairNumFromNames(p, card1))
+                clauses.add(-1 * getPairNumFromNames(p, card2))
+                clauses.add(-1 * getPairNumFromNames(p, card3))
+    else:
+        while True:
+            # If the player refutes, s/he must have at least one card.
+            if player == refuter:
+                # If we know the card, we can just add it to the clauses.
+                if cardShown:
+                    clauses.add(getPairNumFromNames(player, cardShown))
+                # Otherwise s/he can own at least one of the cards.
+                else:
+                    clauses.add([getPairNumFromNames(player, card1),
+                                 getPairNumFromNames(player, card2),
+                                 getPairNumFromNames(player, card3)])
+                break
+            # We ignore the case file in this situation.
+            else if player == caseFile:
+                player = extendedPlayers[(extendedPlayers.index(player) + 1) % 
+                                         len(extendedPlayers)]
+                continue
+            # As we pass a player, they cannot have any of the cards because
+            # they didn't refute anything.
+            else 
+                clauses.add(-1 * getPairNumFromNames(player, card1))
+                clauses.add(-1 * getPairNumFromNames(player, card2))
+                clauses.add(-1 * getPairNumFromNames(player, card3))
+
+                player = extendedPlayers[(extendedPlayers.index(player) + 1) % 
+                                         len(extendedPlayers)]
+
+    return clauses
 
 # TO BE IMPLEMENTED AS AN EXERCISE
 def accuse(accuser, card1, card2, card3, isCorrect):
