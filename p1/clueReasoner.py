@@ -127,34 +127,34 @@ def suggest(suggester, card1, card2, card3, refuter, cardShown):
     # could possibly have the card.
     if refuter == None:
         for p in players:
-            if p !== suggester:
-                clauses.add(-1 * getPairNumFromNames(p, card1))
-                clauses.add(-1 * getPairNumFromNames(p, card2))
-                clauses.add(-1 * getPairNumFromNames(p, card3))
+            if p != suggester:
+                clauses.append(-1 * getPairNumFromNames(p, card1))
+                clauses.append(-1 * getPairNumFromNames(p, card2))
+                clauses.append(-1 * getPairNumFromNames(p, card3))
     else:
         while True:
             # If the player refutes, s/he must have at least one card.
             if player == refuter:
-                # If we know the card, we can just add it to the clauses.
+                # If we know the card, we can just append it to the clauses.
                 if cardShown:
-                    clauses.add(getPairNumFromNames(player, cardShown))
+                    clauses.append(getPairNumFromNames(player, cardShown))
                 # Otherwise s/he can own at least one of the cards.
                 else:
-                    clauses.add([getPairNumFromNames(player, card1),
+                    clauses.append([getPairNumFromNames(player, card1),
                                  getPairNumFromNames(player, card2),
                                  getPairNumFromNames(player, card3)])
                 break
             # We ignore the case file in this situation.
-            else if player == caseFile:
+            elif player == caseFile:
                 player = extendedPlayers[(extendedPlayers.index(player) + 1) % 
                                          len(extendedPlayers)]
                 continue
             # As we pass a player, they cannot have any of the cards because
             # they didn't refute anything.
-            else 
-                clauses.add(-1 * getPairNumFromNames(player, card1))
-                clauses.add(-1 * getPairNumFromNames(player, card2))
-                clauses.add(-1 * getPairNumFromNames(player, card3))
+            else:
+                clauses.append(-1 * getPairNumFromNames(player, card1))
+                clauses.append(-1 * getPairNumFromNames(player, card2))
+                clauses.append(-1 * getPairNumFromNames(player, card3))
 
                 player = extendedPlayers[(extendedPlayers.index(player) + 1) % 
                                          len(extendedPlayers)]
@@ -163,7 +163,17 @@ def suggest(suggester, card1, card2, card3, refuter, cardShown):
 
 # TO BE IMPLEMENTED AS AN EXERCISE
 def accuse(accuser, card1, card2, card3, isCorrect):
-    return []
+    clauses = []
+    if isCorrect:
+        clauses.append(getPairNumFromNames(caseFile, card1))
+        clauses.append(getPairNumFromNames(caseFile, card2))
+        clauses.append(getPairNumFromNames(caseFile, card3))
+    else:
+        clauses.append([-1 * getPairNumFromNames(caseFile, card1),
+                     -1 * getPairNumFromNames(caseFile, card2),
+                     -1 * getPairNumFromNames(caseFile, card3)])
+
+    return clauses
 
 def query(player, card, clauses):
     return SATSolver.testLiteral(getPairNumFromNames(player, card), clauses)
