@@ -1,7 +1,9 @@
+.DS_Store
 zchaff
 *~
 *#
 *.o
+*.cnf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -37,7 +37,7 @@ def testKb(clauses):
             print >> out,literal,
         print >> out,'0'
     out.close();
-    process = subprocess.Popen('zchaff query.cnf',stdout=subprocess.PIPE,
+    process = subprocess.Popen('./zchaff query.cnf',stdout=subprocess.PIPE,
                 shell=True)
     process.wait()
     stdout = process.stdout

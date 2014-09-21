@@ -50,61 +50,36 @@ def initialClauses():
         clauses.append([getPairNumFromNames(p, c) for p in extendedPlayers])
 
     # A card cannot be in two places.
-    # We want (A + B)(-A + -B) for all A, B in extendedPlayers
-    for c in cards:
-        for p in extendedPlayers:
-            for p2 in extendedPlayers:
+    for c in range(0, len(cards)):
+        for p in range(0, len(extendedPlayers)):
+            for p2 in range(p + 1, len(extendedPlayers)):
                 if p != p2:
-                    clause1 = []
-                    clause2 = []
-                    clause1.append(getPairNumFromNames(p, c))
-                    clause1.append(getPairNumFromNames(p2, c))
-                    clause2.append(-1 * getPairNumFromNames(p, c))
-                    clause2.append(-1 * getPairNumFromNames(p2, c))
-                    clauses.append(clause1)
-                    clauses.append(clause2)
+                    clauses.append([-1 * getPairNumFromPositions(p, c),
+                                    -1 * getPairNumFromPositions(p2, c)])
 
     # At least one card of each category is in the case file.
     clauses.append([getPairNumFromNames(caseFile, s) for s in suspects])
-    clauses.append([getPairNumFromNames(caseFile, s) for w in weapons])
-    clauses.append([getPairNumFromNames(caseFile, s) for r in rooms])
+    clauses.append([getPairNumFromNames(caseFile, w) for w in weapons])
+    clauses.append([getPairNumFromNames(caseFile, r) for r in rooms])
 
     # No two cards in each category can both be in the case file.
-    for s in suspects:
-        for s2 in suspects:
-            if s != s2:
-                clause1 = []
-                clause2 = []
-                clause1.append(getPairNumFromNames(caseFile, s))
-                clause1.append(getPairNumFromNames(caseFile, s2))
-                clause2.append(-1 * getPairNumFromNames(caseFile, s))
-                clause2.append(-1 * getPairNumFromNames(caseFile, s2))
-                clauses.append(clause1)
-                clauses.append(clause2)
+    for si, s in enumerate(suspects):
+        for si2, s2 in enumerate(suspects):
+            if si < si2:
+                clauses.append([-1 * getPairNumFromNames(caseFile, s),
+                                -1 * getPairNumFromNames(caseFile, s2)])
 
-    for w in weapons:
-        for w2 in weapons:
-            if w != w2:
-                clause1 = []
-                clause2 = []
-                clause1.append(getPairNumFromNames(caseFile, w))
-                clause1.append(getPairNumFromNames(caseFile, w2))
-                clause2.append(-1 * getPairNumFromNames(caseFile, w))
-                clause2.append(-1 * getPairNumFromNames(caseFile, w2))
-                clauses.append(clause1)
-                clauses.append(clause2)
+    for wi, w in enumerate(weapons):
+        for wi2, w2 in enumerate(weapons):
+            if wi < wi2:
+                clauses.append([-1 * getPairNumFromNames(caseFile, w),
+                                -1 * getPairNumFromNames(caseFile, w2)])
 
-    for r in rooms:
-        for r2 in rooms:
-            if r != r2:
-                clause1 = []
-                clause2 = []
-                clause1.append(getPairNumFromNames(caseFile, r))
-                clause1.append(getPairNumFromNames(caseFile, r2))
-                clause2.append(-1 * getPairNumFromNames(caseFile, r))
-                clause2.append(-1 * getPairNumFromNames(caseFile, r2))
-                clauses.append(clause1)
-                clauses.append(clause2)
+    for ri, r in enumerate(weapons):
+        for ri2, r2 in enumerate(weapons):
+            if ri < ri2:
+                clauses.append([-1 * getPairNumFromNames(caseFile, r),
+                                -1 * getPairNumFromNames(caseFile, r2)])
 
     return clauses
 
@@ -112,8 +87,7 @@ def initialClauses():
 def hand(player, cards):
     clauses = []
     for c in cards:
-        clauses.append(getPairNumFromNames(player, c))
-
+        clauses.append([getPairNumFromNames(player, c)])
     return clauses
 
 
@@ -128,33 +102,38 @@ def suggest(suggester, card1, card2, card3, refuter, cardShown):
     if refuter == None:
         for p in players:
             if p != suggester:
-                clauses.append(-1 * getPairNumFromNames(p, card1))
-                clauses.append(-1 * getPairNumFromNames(p, card2))
-                clauses.append(-1 * getPairNumFromNames(p, card3))
+                clauses.append([-1 * getPairNumFromNames(p, card1)])
+                clauses.append([-1 * getPairNumFromNames(p, card2)])
+                clauses.append([-1 * getPairNumFromNames(p, card3)])
+        clauses.append([getPairNumFromNames(suggester, card1),
+                        getPairNumFromNames(suggester, card2),
+                        getPairNumFromNames(suggester, card3)])
+        clauses.append([getPairNumFromNames(caseFile, card1),
+                        getPairNumFromNames(caseFile, card2),
+                        getPairNumFromNames(caseFile, card3)])
     else:
         while True:
             # If the player refutes, s/he must have at least one card.
             if player == refuter:
                 # If we know the card, we can just append it to the clauses.
                 if cardShown:
-                    clauses.append(getPairNumFromNames(player, cardShown))
+                    clauses.append([getPairNumFromNames(player, cardShown)])
                 # Otherwise s/he can own at least one of the cards.
                 else:
                     clauses.append([getPairNumFromNames(player, card1),
-                                 getPairNumFromNames(player, card2),
-                                 getPairNumFromNames(player, card3)])
+                                    getPairNumFromNames(player, card2),
+                                    getPairNumFromNames(player, card3)])
                 break
             # We ignore the case file in this situation.
             elif player == caseFile:
                 player = extendedPlayers[(extendedPlayers.index(player) + 1) % 
                                          len(extendedPlayers)]
-                continue
             # As we pass a player, they cannot have any of the cards because
             # they didn't refute anything.
             else:
-                clauses.append(-1 * getPairNumFromNames(player, card1))
-                clauses.append(-1 * getPairNumFromNames(player, card2))
-                clauses.append(-1 * getPairNumFromNames(player, card3))
+                clauses.append([-1 * getPairNumFromNames(player, card1)])
+                clauses.append([-1 * getPairNumFromNames(player, card2)])
+                clauses.append([-1 * getPairNumFromNames(player, card3)])
 
                 player = extendedPlayers[(extendedPlayers.index(player) + 1) % 
                                          len(extendedPlayers)]
@@ -165,13 +144,13 @@ def suggest(suggester, card1, card2, card3, refuter, cardShown):
 def accuse(accuser, card1, card2, card3, isCorrect):
     clauses = []
     if isCorrect:
-        clauses.append(getPairNumFromNames(caseFile, card1))
-        clauses.append(getPairNumFromNames(caseFile, card2))
-        clauses.append(getPairNumFromNames(caseFile, card3))
+        clauses.append([getPairNumFromNames(caseFile, card1)])
+        clauses.append([getPairNumFromNames(caseFile, card2)])
+        clauses.append([getPairNumFromNames(caseFile, card3)])
     else:
         clauses.append([-1 * getPairNumFromNames(caseFile, card1),
-                     -1 * getPairNumFromNames(caseFile, card2),
-                     -1 * getPairNumFromNames(caseFile, card3)])
+                        -1 * getPairNumFromNames(caseFile, card2),
+                        -1 * getPairNumFromNames(caseFile, card3)])
 
     return clauses
 
