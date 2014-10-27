@@ -19,7 +19,7 @@ Puzzle::Puzzle(int r, int c, int min, int max)
     max = std::max(r, c) - 1;
   }
 
-  bestScore = 0;
+  bestScore = -100000;
   for(int i = 0; i < 10; i++) {
     for(int j = 0; j < 10; j++) {
       bestPuzzle[i][j] = 0;
@@ -36,7 +36,7 @@ void Puzzle::findBestPuzzle() {
   timer.StartTimer();
   double estimatedTime = 0;
 
-  while(timer.GetElapsedTime() + (estimatedTime * 1.1) < 55.0) {
+  while(timer.GetElapsedTime() + estimatedTime < 58.0) {
     // keep searching if we're approximately under the time threshhold
 
     // create a random puzzle
@@ -47,22 +47,12 @@ void Puzzle::findBestPuzzle() {
     }
     curPuzzle[r-1][c-1] = 0;
 
-    if (estimatedTime == 0) {
-      for(int i = 0; i < r; i++) {
-        for(int j = 0; j < c; j++) {
-          curPuzzle[i][j] = min;
-        }
-      }
-      curPuzzle[r-1][c-1] = 0;
-    }
-
     int solution = 0, black = 0, white = 0, forward = 0, backward = 0;
     bool unique = false;
     
     // let's find the heuristic for it
     int curBest = calcMetrics(curPuzzle, solution, unique, black, white, 
       forward, backward);
-
     // this will store the best candidate per hill climbing step
     int bestCandidate[10][10];
 
@@ -73,6 +63,11 @@ void Puzzle::findBestPuzzle() {
       // find all possible neighbors
       for(int i = 0; i < r; i++) {
         for(int j = 0; j < c; j++) {
+          int x = rand() % (max - min + 1);
+          // we can't change the goal value
+          if(i == r-1 && j == c -1) {
+            continue;
+          }
           // we make a new puzzle
           int newPuzzle[10][10];
 
@@ -96,14 +91,7 @@ void Puzzle::findBestPuzzle() {
               &bestCandidate[0][0]);
             solution = curSol; black = curBl; white = curWh; forward = curFor;
             backward = curBack; unique = curUnique;
-          } else if (curBest == 0 && rand() % 50 == 0) {
-            curBest = candidate;
-            updateBest = true;
-            std::copy(&newPuzzle[0][0], &newPuzzle[0][0]+100, 
-              &bestCandidate[0][0]);
-            solution = curSol; black = curBl; white = curWh; forward = curFor;
-            backward = curBack; unique = curUnique;
-          }
+          } 
         }
       }
 
@@ -111,7 +99,13 @@ void Puzzle::findBestPuzzle() {
         // if we're updating the best, copy the best over to be the current
         std::copy(&bestCandidate[0][0], &bestCandidate[0][0]+100, 
           &curPuzzle[0][0]);
-        // cout << "test" << endl;
+      } else if (rand() % 7 == 0) {
+        // there is a random chance that if we haven't found a better one, 
+        // we'll try one anyways
+        curPuzzle[rand() % r][rand() % c] = rand() % (max - min + 1) + min;
+        curPuzzle[r - 1][c - 1] = 0;
+        curBest = calcMetrics(curPuzzle, solution, unique, black, white, 
+          forward, backward);
       }
     } while (updateBest);
 
@@ -131,7 +125,7 @@ void Puzzle::findBestPuzzle() {
   bool unique = false;
   
   // let's find the heuristic for it
-  calcMetrics(bestPuzzle, solution, unique, black, white, forward, backward);
+  int score = calcMetrics(bestPuzzle, solution, unique, black, white, forward, backward);
 
   // print out the best puzzle
   cout << "Puzzle:" << endl;
@@ -143,17 +137,13 @@ void Puzzle::findBestPuzzle() {
   }
   cout << endl;
   cout << "Solution: " << ((solution > 0) ? "Yes" : "No") << endl;
-  cout << "Unique :" << (unique? "Yes" : "No") << endl;
+  cout << "Unique: " << (unique? "Yes" : "No") << endl;
   cout << "Solution length: " << solution << endl;
   cout << "# of black holes: " << black << endl;
   cout << "# of white holes: " << white << endl;
   cout << "# of forced forward moves: " << forward << endl;
   cout << "# of forced backward moves: " << backward << endl;
-  int score = solution * 5 - black * 2 - white * 2 - forward * 2 - backward * 2;
-  if(unique) {
-    score += r * c;
-  }
-  cout << "Puzzle score: " << score << endl;
+  cout << "Puzzle score: " << score << endl << endl;
 
 }
 
@@ -186,16 +176,25 @@ int Puzzle::calcMetrics(int puzzle[][10], int & solution, bool & unique,
   std::set_difference(reachable.begin(), reachable.end(), reaching.begin(), 
     reaching.end(), std::inserter(blackHoles, blackHoles.end()));
   black = blackHoles.size();
+  if(blackHoles.find((r-1)*100 + (c-1)) != blackHoles.end()) {
+    black--;
+  }
 
   // white hole sare reaching but not reachable nodes
   set<int> whiteHoles;
   std::set_difference(reaching.begin(), reaching.end(), reachable.begin(), 
     reachable.end(), std::inserter(whiteHoles, whiteHoles.end()));
   white = whiteHoles.size();
+  if(whiteHoles.find(0) != whiteHoles.end()) {
+    white--;
+  }
 
   forward = 0;
   // forced forward nodes are reachable nodes with only one outgoing edge
   for(set<int>::iterator it = reachable.begin(); it != reachable.end(); ++it) {
+    if(*it == (r-1)*100 + (c-1)){
+      continue;
+    }
     if(nodes[*it].n.size() == 1){
       forward++;
     }
@@ -204,6 +203,9 @@ int Puzzle::calcMetrics(int puzzle[][10], int & solution, bool & unique,
   backward = 0;
   // forced backwards are reaching nodes with only one incoming edge
   for(set<int>::iterator it = reaching.begin(); it != reaching.end(); ++it) {
+    if(*it == 0) {
+      continue;
+    }
     if(nodes[*it].p.size() == 1){
       backward++;
     }
@@ -214,8 +216,7 @@ int Puzzle::calcMetrics(int puzzle[][10], int & solution, bool & unique,
     return 0;
   }
 
-  int h = 5*(r*c - solution); 
-  // this should never be negative as the solution should never revisit nodes
+  int h = 5*(solution); 
   if (unique) {
     h += r*c;
   }
@@ -242,30 +243,34 @@ void Puzzle::initNodes(int puzzle[][10], map<int, Node>& nodes) {
     for(int j = 0; j < c; j++) {
       Node temp = nodes[i*100 + j];
       int val = puzzle[i][j];
+      if(val == 0) {
+        continue;
+      }
 
+      // cout << i << " , " << j << endl;
       // north
       if (i - val >= 0) {
         // we add that node to the list of forward pointers for our node
-        temp.n.insert((i - val) * 100 + j);
+        nodes[i*100 + j].n.insert((i - val) * 100 + j);
         // we add our node to a list of backwards pointers for that node
         nodes[(i - val) * 100 + j].p.insert(i * 100 + j);
       }
 
       // south
       if (i + val < r) {
-        temp.n.insert((i + val) * 100 + j);
+        nodes[i*100 + j].n.insert((i + val) * 100 + j);
         nodes[(i + val) * 100 + j].p.insert(i * 100 + j);
       }
 
       // west
       if (j - val >= 0) {
-        temp.n.insert(i * 100 + (j - val));
+        nodes[i*100 + j].n.insert(i * 100 + (j - val));
         nodes[i * 100 + (j - val)].p.insert(i * 100 + j);
       }
 
       // east
       if (j + val < c) {
-        temp.n.insert(i * 100 + (j + val));
+        nodes[i*100 + j].n.insert(i * 100 + (j + val));
         nodes[i * 100 + (j + val)].p.insert(i * 100 + j);
       }
     }
@@ -311,7 +316,9 @@ set<int> Puzzle::forwardBFS(int puzzle[][10], map<int, Node>& nodes, int & goal,
       set<int> children = nodes[temp].n;
       for(set<int>::iterator it = children.begin(); it != children.end(); ++it) 
       {
-        reachable.insert(*it);
+        if(reachable.find(*it) == reachable.end()) {
+          q.push(*it);
+        }
 
         // update the distance of the children
         if(dist[*it/100][*it % 100] == -1) {
@@ -346,8 +353,8 @@ set<int> Puzzle::backwardBFS(int puzzle[][10], map<int, Node>& nodes) {
   queue<int> q;
   set<int> reaching;
 
-  // add start to the set
-  q.push(0);
+  // add goal to the set
+  q.push((r-1)*100 + c-1);
   while(!q.empty()) {
     // take the top of the queue
     int temp = q.front(); 
@@ -361,7 +368,7 @@ set<int> Puzzle::backwardBFS(int puzzle[][10], map<int, Node>& nodes) {
       // add its parents to the queue
       set<int> parents = nodes[temp].p;
       for(set<int>::iterator it = parents.begin(); it != parents.end(); ++it) {
-        reaching.insert(*it);
+        q.push(*it);
       }
     }
   }

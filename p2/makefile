@@ -17,5 +17,5 @@ clean:
 test:
 	make clean		
 	make all
-	./$(EXEC) 5 5 1 4
+	./$(EXEC) 10 10 1 9
 	

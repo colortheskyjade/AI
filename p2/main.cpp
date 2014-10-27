@@ -16,7 +16,24 @@ using namespace std;
 void GeneratePuzzle(int nRows, int nColumns, int minVal, int maxVal)
 {
 	Puzzle p(nRows, nColumns, minVal, maxVal);	
+	cout << endl; // formatting
 	p.findBestPuzzle();
+
+	// DEBUG
+	// int arr[10][10] =	 {2, 5, 6, 5, 4, 2, 6, 2, 2, 6,
+	// 				1, 1, 3, 1, 2, 2, 2, 7, 1, 3,
+	// 				8, 7, 4, 6, 2, 2, 2, 7, 9, 5,
+	// 				5, 5, 7, 6, 3, 4, 5, 3, 9, 9,
+	// 				1, 4, 4, 2, 8, 7, 2, 4, 6, 1,
+	// 				2, 1, 2, 5, 8, 3, 8, 4, 3, 4,
+	// 				2, 3, 6, 2, 2, 8, 4, 1, 6, 6,
+	// 				1, 9, 4, 4, 2, 3, 2, 2, 7, 1,
+	// 				6, 1, 6, 5, 1, 4, 5, 5, 8, 5,
+	// 				4, 7, 6, 3, 4, 8, 4, 5, 2, 0};
+	// int sol, black, white, forward, backward;
+	// bool unique;
+	// p.calcMetrics(arr, sol, unique, black, white, forward, backward);
+	// cout << sol << " " << black << " " << white << " " << forward << " " << backward << endl;
 }
 
 int main(int argc, char **argv)
