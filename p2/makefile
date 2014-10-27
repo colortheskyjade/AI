@@ -2,11 +2,14 @@ CC = g++
 CFLAGS = -O3
 EXEC = PuzzleGenerator
 	
-all: node.o
-	$(CC) $(CFLAGS) -o $(EXEC) main.cpp node.o
+all: node.o puzzle.o
+	$(CC) $(CFLAGS) -o $(EXEC) main.cpp node.o puzzle.o
 
 node.o: node.h node.cpp
 	$(CC) -g -Wall -c -o node.o node.cpp
+
+puzzle.o: puzzle.h puzzle.cpp
+	$(CC) -g -Wall -c -o puzzle.o puzzle.cpp
 	
 clean:
 	rm -rf $(EXEC) *.o
@@ -14,5 +17,5 @@ clean:
 test:
 	make clean		
 	make all
-	./$(EXEC) 5 5 2 4
+	./$(EXEC) 5 5 1 4
 	

@@ -2,7 +2,10 @@
 #define PUZZLE_H
 
 #include <iostream>
+#include <set>
+#include <map>
 #include "Timer.h"
+#include "node.h"
 
 class Puzzle {
   public:
@@ -12,8 +15,10 @@ class Puzzle {
     void findBestPuzzle();
 
     // helper functions
-    int calcMetrics(int[][10], int, bool, int, int, int, int);
-    void initNodes(int[][10], map<int, Node>&);
+    int calcMetrics(int[][10], int&, bool&, int&, int&, int&, int&);
+    void initNodes(int[][10], std::map<int, Node>&);
+    std::set<int> forwardBFS(int[][10], std::map<int, Node>&, int&, bool&);
+    std::set<int> backwardBFS(int[][10], std::map<int, Node>&);
 
     // data members
     Timer timer;

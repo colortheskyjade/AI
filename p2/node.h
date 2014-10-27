@@ -6,6 +6,7 @@
 
 class Node {
   public:
+    Node();
     Node(int, int);
     ~Node();
 

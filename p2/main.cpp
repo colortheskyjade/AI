@@ -9,10 +9,9 @@ STUDENT ID: 2890440150
 #include <stdio.h>
 #include "Timer.h"
 #include "node.h"
+#include "puzzle.h"
 
 using namespace std;
-
-int getHeuristic(nodeArray);
 
 void GeneratePuzzle(int nRows, int nColumns, int minVal, int maxVal)
 {
