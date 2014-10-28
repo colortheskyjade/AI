@@ -18,4 +18,4 @@ test:
 	make clean		
 	make all
 	./$(EXEC) 10 10 1 9
-	
+

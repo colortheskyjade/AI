@@ -40,11 +40,19 @@ void Puzzle::findBestPuzzle() {
     // keep searching if we're approximately under the time threshhold
 
     // create a random puzzle
-    for(int i = 0; i < r; i++) {
-      for(int j = 0; j < c; j++) {
-        curPuzzle[i][j] = rand() % (max - min + 1) + min;
+    // if(estimatedTime == 0) {
+    //   for(int i = 0; i < r; i++) {
+    //     for(int j = 0; j < c; j++) {
+    //       curPuzzle[i][j] = min;
+    //     }
+    //   }
+    // } else {
+      for(int i = 0; i < r; i++) {
+        for(int j = 0; j < c; j++) {
+          curPuzzle[i][j] = rand() % (max - min + 1) + min;
+        }
       }
-    }
+    // }
     curPuzzle[r-1][c-1] = 0;
 
     int solution = 0, black = 0, white = 0, forward = 0, backward = 0;
@@ -59,6 +67,9 @@ void Puzzle::findBestPuzzle() {
     bool updateBest = false;
     // while there is still some hill climbing to do
     do { 
+      if(timer.GetElapsedTime() >= 58.0) {
+        break;
+      }
       updateBest = false;
       // find all possible neighbors
       for(int i = 0; i < r; i++) {
@@ -110,7 +121,7 @@ void Puzzle::findBestPuzzle() {
     } while (updateBest);
 
     // after we've found a local maxima, update the best if necessary
-    if (curBest > bestScore) {
+    if (curBest >= bestScore) {
       bestScore = curBest;
       std::copy(&curPuzzle[0][0], &curPuzzle[0][0]+100, &bestPuzzle[0][0]);
     }
@@ -279,7 +290,7 @@ void Puzzle::initNodes(int puzzle[][10], map<int, Node>& nodes) {
 
 
 /**
- * Initializes the map of nodes from the start.
+ * Forward BFS to return the reachable nodes.
  * @param puzzle The 2d array puzzle.
  * @param nodes  The map of nodes.
  * @param goal   The number of steps before we expand the goal.
@@ -344,7 +355,7 @@ set<int> Puzzle::forwardBFS(int puzzle[][10], map<int, Node>& nodes, int & goal,
 
 
 /**
- * Initializes the map of nodes from the end.
+ * Backwards BFS to get a set of reaching nodes.
  * @param puzzle The 2d array puzzle.
  * @param nodes  The map of nodes.
  * @return       A set of reaching nodes.
