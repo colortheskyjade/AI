@@ -74,7 +74,7 @@ void Puzzle::findBestPuzzle() {
       // find all possible neighbors
       for(int i = 0; i < r; i++) {
         for(int j = 0; j < c; j++) {
-          int x = rand() % (max - min + 1);
+          int x = (rand() % (max - min)) + 1;
           // we can't change the goal value
           if(i == r-1 && j == c -1) {
             continue;
@@ -110,7 +110,7 @@ void Puzzle::findBestPuzzle() {
         // if we're updating the best, copy the best over to be the current
         std::copy(&bestCandidate[0][0], &bestCandidate[0][0]+100, 
           &curPuzzle[0][0]);
-      } else if (rand() % 7 == 0) {
+      } else if (rand() % 10 == 0) {
         // there is a random chance that if we haven't found a better one, 
         // we'll try one anyways
         curPuzzle[rand() % r][rand() % c] = rand() % (max - min + 1) + min;
